@@ -687,16 +687,23 @@ def ripping_app (package_name_under_test, entry_activity_under_test, startr, nol
                   else # if the project was compiled by gradle, get code coverage by Jacoco
                     
                     # coverage info format: "#covered_lines #line_coverage_percentage" 
-                    #cmd = "python #{$myConf.get_stoat_tool_dir()}/android_instrument/dump_coverage.py #{$myConf.get_app_absolute_dir_path()} fsm"
-		    #puts "$ #{cmd}"
-		    #coverage_info = `#{cmd}`
-                    #puts "coverage_info: #{coverage_info}"
+                    fsm_coverage_dir = "#{$myConf.get_fsm_building_dir()}/coverage"
+                    merged_cov_ec_file = "#{$myConf.get_app_absolute_dir_path()}/app/build/outputs/coverage.ec"
+                    merge_cmd = "python #{$myConf.get_stoat_tool_dir()}/android_instrument/merge_coverage.py #{fsm_coverage_dir} #{merged_cov_ec_file}"
+                    puts "$ #{merge_cmd}"
+                    `#{merge_cmd}`
+                    generate_cmd = "#{$myConf.get_app_absolute_dir_path()}/gradlew jacocoTestReport"
+                    puts "$ #{generate_cmd}"
+                    `#{generate_cmd}`
+                    cov_html = "#{$myConf.get_app_absolute_dir_path()}/app/build/reports/jacoco/jacocoTestReport/html/index.html"
+                    cov_cmd = "#{$myConf.get_stoat_tool_dir()}/android_instrument/extract_coverage.py #{cov_html}"
+		                puts "$ #{cmd}"
+		                coverage_info = `#{cmd}`
+                    puts "coverage_info: #{coverage_info}"
                     
-                    #coverage_data = coverage_info.split(' ')
-                    #lineCov = coverage_data[0].to_f
-                    #lineCovPercentage = coverage_data[1].to_f*100
-		    lineCov = 0
-		    lineCovPercentage = 0
+                    coverage_data = coverage_info.split(' ')
+                    lineCov = coverage_data[0].to_f
+                    lineCovPercentage = coverage_data[1].to_f
                     
                     puts "lineCov = #{lineCov}"
                     puts "lineCovPercentage = #{lineCovPercentage}"
