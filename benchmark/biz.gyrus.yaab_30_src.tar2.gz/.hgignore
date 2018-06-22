@@ -1,9 +1,0 @@
-# use glob syntax
-syntax: glob
-
-*.bak
-*.cache
-*.log
-gen
-[Bb]in
-.hgignore~
