@@ -695,15 +695,11 @@ def ripping_app (package_name_under_test, entry_activity_under_test, startr, nol
                     generate_cmd = "#{$myConf.get_app_absolute_dir_path()}/gradlew jacocoTestReport"
                     puts "$ #{generate_cmd}"
                     `#{generate_cmd}`
-                    cov_html = "#{$myConf.get_app_absolute_dir_path()}/app/build/reports/jacoco/jacocoTestReport/html/index.html"
-                    cov_cmd = "#{$myConf.get_stoat_tool_dir()}/android_instrument/extract_coverage.py #{cov_html}"
-		                puts "$ #{cmd}"
-		                coverage_info = `#{cmd}`
-                    puts "coverage_info: #{coverage_info}"
+                    $g_coverage_txt = "#{$myConf.get_app_absolute_dir_path()}/app/build/reports/jacoco/jacocoTestReport/html/index.html"
+                    $coverager.parse_jacoco_coverage_report $g_coverage_txt
                     
-                    coverage_data = coverage_info.split(' ')
-                    lineCov = coverage_data[0].to_f
-                    lineCovPercentage = coverage_data[1].to_f
+                    lineCov = $coverager.getLineCoverage
+                    lineCovPercentage = $coverager.getLineCoveragePercentage
                     
                     puts "lineCov = #{lineCov}"
                     puts "lineCovPercentage = #{lineCovPercentage}"
@@ -772,6 +768,21 @@ def ripping_app (package_name_under_test, entry_activity_under_test, startr, nol
                         f.puts output
                       else
                         # TODO do nothing for gradle project
+                        $coverager.parse_jacoco_coverage_report $g_coverage_txt
+                        covered_lines = $coverager.getLineCoverage()
+                        total_executable_lines = $coverager.getTotalExecutableLine()
+                        line_coverage_percentage = $coverager.getLineCoveragePercentage()
+                        
+                        covered_methods = $coverager.getMethodCoverage()
+                        total_methods = $coverager.getTotalMethods()
+                        method_coverage_percentage = $coverager.getMethodCoveragePercentage()
+                        
+                        total_classes = $coverager.getTotalClasses()
+                        app_dir_name = $myConf.get_app_dir_name()
+                        
+                        output = "#{app_dir_name},#{total_classes},#{total_methods},#{covered_methods},#{method_coverage_percentage}," +
+                                "#{total_executable_lines},#{covered_lines},#{line_coverage_percentage},#{$g_maximum_line_coverage_events}"
+                        f.puts output
                       end
                       
                   }
