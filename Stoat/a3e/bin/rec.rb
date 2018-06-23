@@ -583,7 +583,6 @@ end
 # rip an app under test
 def ripping_app (package_name_under_test, entry_activity_under_test, startr, noloop)
 
-    
     # remove the old log file
     if File.exist?($myConf.get_fsm_building_dir+ "/" + "fsm_building_progress.txt") then
         File.delete($myConf.get_fsm_building_dir+ "/" + "fsm_building_progress.txt")
@@ -644,7 +643,7 @@ def ripping_app (package_name_under_test, entry_activity_under_test, startr, nol
             
             
             # dump coverage files every five iterations, we do not dump coverage for closed-source apps
-            if $closed_source_apk == false && $default_A3E_iteration % 100 == 0 && (not $g_disable_coverage_report) then
+            if $closed_source_apk == false && $default_A3E_iteration % 2 == 0 && (not $g_disable_coverage_report) then
             
               # dump code coverage
               # Note we use timeout to solve non-responding cases when dumping code coverage
@@ -660,6 +659,7 @@ def ripping_app (package_name_under_test, entry_activity_under_test, startr, nol
               lineCovPercentage = 0
               
               if File.exist?(coverage_ec) then
+
 
                   # if the project was compiled by ant, get code coverage by emma
                   if $g_project_type.eql?("ant") then
@@ -688,13 +688,14 @@ def ripping_app (package_name_under_test, entry_activity_under_test, startr, nol
                     
                     # coverage info format: "#covered_lines #line_coverage_percentage" 
                     fsm_coverage_dir = "#{$myConf.get_fsm_building_dir()}/coverage"
+
                     merged_cov_ec_file = "#{$myConf.get_app_absolute_dir_path()}/app/build/outputs/coverage.ec"
                     merge_cmd = "python #{$myConf.get_stoat_tool_dir()}/android_instrument/merge_coverage.py #{fsm_coverage_dir} #{merged_cov_ec_file}"
                     puts "$ #{merge_cmd}"
                     `#{merge_cmd}`
-                    generate_cmd = "#{$myConf.get_app_absolute_dir_path()}/gradlew jacocoTestReport"
-                    puts "$ #{generate_cmd}"
-                    `#{generate_cmd}`
+                    generate_cmd = "#{$myConf.get_app_absolute_dir_path()}/gradlew -p #{$myConf.get_app_absolute_dir_path()} jacocoTestReport --stacktrace > mylogs.txt 2> logerror.txt"
+                    UTIL.execute_shell_cmd_with_output(generate_cmd)
+                    puts "Jacoco report generated"
                     $g_coverage_txt = "#{$myConf.get_app_absolute_dir_path()}/app/build/reports/jacoco/jacocoTestReport/html/index.html"
                     $coverager.parse_jacoco_coverage_report $g_coverage_txt
                     

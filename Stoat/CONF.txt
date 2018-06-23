@@ -1,9 +1,9 @@
 # Android SDK Configurations
-ANDROID_SDK_DIR = /home/suting/Android/Sdk
-ANDROID_LIB_DIR = /home/suting/Android/Sdk/platforms/android-18/android.jar
+ANDROID_SDK_DIR = /home/sunyi/Android/Sdk
+ANDROID_LIB_DIR = /home/sunyi/Android/Sdk/platforms/android-18/android.jar
 
 # Stoat Tool Dir 
-STOAT_TOOL_DIR = /home/suting/proj/fsmdroid
+STOAT_TOOL_DIR = /home/sunyi/Workspace/Stoat/Stoat
 
 # Timeout Command, use "timeout" for Linux, use "gtimeout" for MacOS
 TIMEOUT_CMD = timeout 

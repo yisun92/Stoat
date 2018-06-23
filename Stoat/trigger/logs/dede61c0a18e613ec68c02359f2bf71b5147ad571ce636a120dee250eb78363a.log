@@ -1,0 +1,4 @@
+package_name=com.avjindersinghsekhon.minimaltodo
+activity=com.example.avjindersinghsekhon.minimaltodo.MainActivity com.example.avjindersinghsekhon.minimaltodo.AddToDoActivity com.example.avjindersinghsekhon.minimaltodo.AboutActivity com.example.avjindersinghsekhon.minimaltodo.ReminderActivity com.example.avjindersinghsekhon.minimaltodo.SettingsActivity
+service=com.example.avjindersinghsekhon.minimaltodo.TodoNotificationService com.example.avjindersinghsekhon.minimaltodo.DeleteNotificationService
+receiver=com.example.avjindersinghsekhon.minimaltodo.instrumentation.CoverageDataDumper
