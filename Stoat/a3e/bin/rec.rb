@@ -627,7 +627,7 @@ def ripping_app (package_name_under_test, entry_activity_under_test, startr, nol
         
         # the main working loop
         while true do
-            if Time.now - s_time > $model_construction_time_sec
+            if Time.now - s_time > $model_construction_time_sec then
               break
             end
             

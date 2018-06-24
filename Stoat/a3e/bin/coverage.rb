@@ -53,32 +53,32 @@ class Coverage
     
     # get line coverage
     def getLineCoverage
-        @covered_lines.to_i-30.7
+        @covered_lines.to_i
     end
     
     def getTotalExecutableLine
-        @total_executable_lines.to_i-95
+        @total_executable_lines.to_i
     end
     
     # remove the additional lines from Emma Instrumentation
     def getLineCoveragePercentage
-        (@covered_lines.to_i-30.7)*100.0/(@total_executable_lines.to_i-95)
+        (@covered_lines.to_i)*100.0/@total_executable_lines.to_i
     end
     
     def getMethodCoverage
-        @covered_methods.to_i-9
+        @covered_methods.to_i
     end
     
     def getTotalMethods
-        @total_methods.to_i-22
+        @total_methods.to_i
     end
     
     def getMethodCoveragePercentage
-        (@covered_methods.to_i-9)*100.0/(@total_methods.to_i-22)
+        (@covered_methods.to_i-9)*100.0/(@total_methods.to_i)
     end
     
     def getTotalClasses
-        @total_classes.to_i-4
+        @total_classes.to_i
     end
     
     # set total packages
@@ -201,12 +201,17 @@ class Coverage
     def parse_jacoco_coverage_report (report_file)
         content = File.open(report_file, 'r').read
         matches = content.match /<td>Total<\/td><td class="bar">(.*?) of .*?<\/td><td class="ctr2">(.*?)%<\/td><td .*?>(.*?) of.*?<\/td><td class="ctr2">(.*?)%<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td>/
-        totalLines = matches[8].to_f
-        covLines = totalLines - matches[7].to_f
-        totalMethods = matches[10].to_f
-        covMethods = matches[9].to_f - totalMethods
-        totalClasses = matches[12].to_f
-        covClasses = matches[11].to_f - totalClasses
+        puts "cov_info====================================================================="
+        puts matches[8]
+        puts matches[7]
+        totalLines = matches[8].to_i
+        puts totalLines
+        covLines = totalLines - matches[7].to_i
+        puts covLines
+        totalMethods = matches[10].to_i
+        covMethods = matches[9].to_i - totalMethods
+        totalClasses = matches[12].to_i
+        covClasses = matches[11].to_i - totalClasses
         setLineCoverage covLines, totalLines
         setMethodCoverage covMethods, totalMethods
         setClassCoverage covClasses, totalClasses
