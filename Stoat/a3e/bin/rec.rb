@@ -583,6 +583,8 @@ end
 # rip an app under test
 def ripping_app (package_name_under_test, entry_activity_under_test, startr, noloop)
 
+    s_time = Time.now
+
     # remove the old log file
     if File.exist?($myConf.get_fsm_building_dir+ "/" + "fsm_building_progress.txt") then
         File.delete($myConf.get_fsm_building_dir+ "/" + "fsm_building_progress.txt")
@@ -625,6 +627,9 @@ def ripping_app (package_name_under_test, entry_activity_under_test, startr, nol
         
         # the main working loop
         while true do
+            if Time.now - s_time > $model_construction_time_sec
+              break
+            end
             
             puts "-------[Iteration: #{$default_A3E_iteration}]----------"
             
@@ -962,6 +967,9 @@ $g_disable_crash_report = false
 $g_disable_coverage_report = false
 $g_enable_screenshot = false
 $g_app_start_wait_time = 5
+
+$model_construction_time_sec = 1*60*60
+$mcmc_sampling_time = 1*60*60
 
 Dir.foreach(PARENT) {|f| fn = File.join(PARENT, f); File.delete(fn) if f != '.' && f != '..'}
 

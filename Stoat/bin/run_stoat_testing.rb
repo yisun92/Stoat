@@ -219,19 +219,7 @@ def construct_fsm(app_dir, apk_path, avd_serial="emulator-5554", stoat_port="200
 	  		
 			# start the stoat client
 			Dir.chdir($STOAT_TOOL_DIR + "/a3e") do
-				puts "start"
-				pid = Process.spawn("ruby ./bin/rec.rb --app #{app_dir_path} --apk #{apk_path} --dev #{avd_serial} --port #{stoat_port} --no-rec -loop --search weighted --events #{$max_event_number} --event_delay #{$event_delay} --project_type #{$project_type}")
-				begin
-					Timeout.timeout($model_construction_time_sec) do
-						puts "wait for the prcess to end"
-						Process.wait(pid)
-						puts 'process finished in time'
-					end
-				rescue Timeout::Error
-					puts "process not finished in time, killing it"
-					Process.kill('TERM', pid)
-				end
-			  	#execute_shell_cmd_output("#{$timeout_cmd} #{$model_construction_time} ruby ./bin/rec.rb --app #{app_dir_path} --apk #{apk_path} --dev #{avd_serial} --port #{stoat_port} --no-rec -loop --search weighted --events #{$max_event_number} --event_delay #{$event_delay} --project_type #{$project_type}")
+			  	execute_shell_cmd_output("ruby ./bin/rec.rb --app #{app_dir_path} --apk #{apk_path} --dev #{avd_serial} --port #{stoat_port} --no-rec -loop --search weighted --events #{$max_event_number} --event_delay #{$event_delay} --project_type #{$project_type}")
 			end
 
 			puts "** FINISH STOAT FOR FSM BUILDING"
@@ -426,9 +414,7 @@ stoat_port="2000"
 force_to_create=false 
 force_to_restart=false
 $model_construction_time="1h"
-$model_construction_time_sec = 1*60*60
 $mcmc_sampling_time="1h"
-$mcmc_sampling_time = 1*60*60
 
 # only construct the app model by gui exploration without mcmc sampling
 $only_gui_exploration=false 
