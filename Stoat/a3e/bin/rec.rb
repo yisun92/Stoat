@@ -969,7 +969,7 @@ $g_enable_screenshot = false
 $g_app_start_wait_time = 5
 
 $model_construction_time_sec = 1*60*60
-$mcmc_sampling_time = 1*60*60
+
 
 Dir.foreach(PARENT) {|f| fn = File.join(PARENT, f); File.delete(fn) if f != '.' && f != '..'}
 
