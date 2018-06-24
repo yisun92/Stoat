@@ -201,12 +201,12 @@ class Coverage
     def parse_jacoco_coverage_report (report_file)
         content = File.open(report_file, 'r').read
         matches = content.match /<td>Total<\/td><td class="bar">(.*?) of .*?<\/td><td class="ctr2">(.*?)%<\/td><td .*?>(.*?) of.*?<\/td><td class="ctr2">(.*?)%<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td>/
-        totalLines = matches[8]
-        covLines = totalLines - matches[7]
-        totalMethods = matches[10]
-        covMethods = matches[9] - totalMethods
-        totalClasses = matches[12]
-        covClasses = matches[11] - totalClasses
+        totalLines = matches[8].to_f
+        covLines = totalLines - matches[7].to_f
+        totalMethods = matches[10].to_f
+        covMethods = matches[9].to_f - totalMethods
+        totalClasses = matches[12].to_f
+        covClasses = matches[11].to_f - totalClasses
         setLineCoverage covLines, totalLines
         setMethodCoverage covMethods, totalMethods
         setClassCoverage covClasses, totalClasses
