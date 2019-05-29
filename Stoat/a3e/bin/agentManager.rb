@@ -350,20 +350,15 @@ class AgentManager
     def parse_jacoco_coverage_report (report_file)
         content = File.open(report_file, 'r').read
         matches = content.match /<td>Total<\/td><td class="bar">(.*?) of .*?<\/td><td class="ctr2">(.*?)%<\/td><td .*?>(.*?) of.*?<\/td><td class="ctr2">(.*?)%<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td><td.*?>(.*?)<\/td>/
-        puts "cov_info====================================================================="
-        puts matches[8]
-        puts matches[7]
         totalLines = matches[8].to_i
-        puts totalLines
         covLines = totalLines - matches[7].to_i
-        puts covLines
         totalMethods = matches[10].to_i
         covMethods = matches[9].to_i - totalMethods
         totalClasses = matches[12].to_i
         covClasses = matches[11].to_i - totalClasses
-        setLineCoverage covLines, totalLines
-        setMethodCoverage covMethods, totalMethods
-        setClassCoverage covClasses, totalClasses
+        @coverager.setLineCoverage covLines, totalLines
+        @coverager.setMethodCoverage covMethods, totalMethods
+        @coverager.setClassCoverage covClasses, totalClasses
     end
     
     
@@ -430,7 +425,7 @@ class AgentManager
         puts "#{coverage_files}"
         str_coverage_files = ""
         coverage_files.each_line do |line|
-            str_coverage_files += line.strip + ","
+            str_coverage_files += line.strip + " "
         end
         
         if str_coverage_files.eql?("") then
@@ -440,15 +435,28 @@ class AgentManager
         if all==false then
             # merge all coverage.ec files from one mcmc iteration into one single coverage.ec file, otherwise the argument list
             # could be too long for emma when computing the history coverage
-            coverage_merge_ec_cmd = "java -jar #{$myConf.get_stoat_tool_dir()}/android_instrument/jacoco.cli.jar merge " + str_coverage_files[0..(str_coverage_files.length-1)] + " --destfile #{@mcmc_sampling_coverage_log_dir}/MCMC_ITERATION_#{@mcmc_iteration}.ec"
+            merged_cov_ec_file = "#{$myConf.get_app_absolute_dir_path()}/app/build/outputs/coverage.ec"
+            coverage_merge_ec_cmd = "java -jar #{$myConf.get_stoat_tool_dir()}/android_instrument/jacoco.cli.jar merge " + str_coverage_files[0..(str_coverage_files.length-1)] + " --destfile #{merged_cov_ec_file}"
             puts "$#{coverage_merge_ec_cmd}"
             `#{coverage_merge_ec_cmd}`
+            `cp #{merged_cov_ec_file} #{@mcmc_sampling_coverage_log_dir}/MCMC_ITERATION_#{@mcmc_iteration}.ec`
+            
+            generate_cmd = "#{$myConf.get_app_absolute_dir_path()}/gradlew -p #{$myConf.get_app_absolute_dir_path()} jacocoTestReport"
+            UTIL.execute_shell_cmd(generate_cmd)
+            puts "Jacoco report generated"
+            $g_coverage_txt = "#{$myConf.get_app_absolute_dir_path()}/app/build/reports/jacoco/jacocoTestReport/html/index.html"
             
             #delete all these intermediate coverage files
             rm_ecs_cmd = "rm -rf #{@mcmc_sampling_coverage_log_dir}/*_MCMC_#{@mcmc_iteration}.ec"
             puts "$#{rm_ecs_cmd}"
             `#{rm_ecs_cmd}`
-            generate_cmd = "#{$myConf.get_app_absolute_dir_path()}/gradlew -p #{$myConf.get_app_absolute_dir_path()} jacocoTestReport --stacktrace > mylogs.txt 2> logerror.txt"
+        else
+            merged_cov_ec_file = "#{$myConf.get_app_absolute_dir_path()}/app/build/outputs/coverage.ec"
+            coverage_merge_ec_cmd = "java -jar #{$myConf.get_stoat_tool_dir()}/android_instrument/jacoco.cli.jar merge " + str_coverage_files[0..(str_coverage_files.length-1)] + " --destfile #{merged_cov_ec_file}"
+            puts "$#{coverage_merge_ec_cmd}"
+            `#{coverage_merge_ec_cmd}`
+            
+            generate_cmd = "#{$myConf.get_app_absolute_dir_path()}/gradlew -p #{$myConf.get_app_absolute_dir_path()} jacocoTestReport"
             UTIL.execute_shell_cmd(generate_cmd)
             puts "Jacoco report generated"
             $g_coverage_txt = "#{$myConf.get_app_absolute_dir_path()}/app/build/reports/jacoco/jacocoTestReport/html/index.html"
@@ -460,7 +468,7 @@ class AgentManager
     end
     
     def manager_working_loop (max_iteration)
-        
+        s_time = Time.now
         
         # make sure all agents are ready
         done = false
@@ -626,31 +634,30 @@ class AgentManager
               parse_jacoco_coverage_report($g_coverage_txt)
               lineCov = @coverager.getCoverage
               lineCovPer = @coverager.getLineCoveragePercentage
-            end
+            
               
-			  if not $g_disable_coverage_report then
+			  #if not $g_disable_coverage_report then
               	# coverage info format: "#covered_lines #line_coverage_percentage" 
               	#coverage_info = UTIL.execute_shell_cmd("python ../android_instrument/dump_coverage.py #{$myConf.get_app_absolute_dir_path()} mcmc | tail -1")
               
               	#coverage_data = coverage_info.split(' ')
               	#lineCov = coverage_data[0]
               	#lineCovPer = coverage_data[1]
-			  end
+			  #end
 
-	      	  lineCov = 0
-	      	  lineCovPer = 0.5 # TODO FAKE coverage
+	      	  
               
               # rename the coverage data dir name to help gradle coverage 
-              UTIL.execute_shell_cmd("mv #{@mcmc_sampling_coverage_log_dir} #{@mcmc_sampling_log_dir}/MCMC_coverage_#{@mcmc_iteration}")
-              UTIL.execute_shell_cmd("mkdir -p #{@mcmc_sampling_coverage_log_dir}")
+              # UTIL.execute_shell_cmd("mv #{@mcmc_sampling_coverage_log_dir} #{@mcmc_sampling_log_dir}/MCMC_coverage_#{@mcmc_iteration}")
+              # UTIL.execute_shell_cmd("mkdir -p #{@mcmc_sampling_coverage_log_dir}")
              
             end
             
             # record the statistic info
             open(@mcmc_sampling_log_file, 'a') { |f|
-                f.puts "MCMC: iteration: #{@mcmc_iteration}, test suite size: #{test_suite_size}, the line coverage: #{lineCov}, the elapsed time: #{elapsed_time}"
+                f.puts "MCMC: iteration: #{@mcmc_iteration}, test suite size: #{test_suite_size}, the line coverage: #{lineCovPer}, the elapsed time: #{elapsed_time}"
             }
-            puts "#{@manager_name} I: MCMC: iteration: #{@mcmc_iteration}, test suite size: #{test_suite_size}, the line coverage: #{lineCov}"
+            puts "#{@manager_name} I: MCMC: iteration: #{@mcmc_iteration}, test suite size: #{test_suite_size}, the line coverage: #{lineCovPer}"
             
             # send the code coverage to the server
             clientSession.puts "PULL_COV"
@@ -672,32 +679,32 @@ class AgentManager
               end
             else
               # TODO do nothing for gradle
-              merge_jacoco_coverage_files(false)
+              merge_jacoco_coverage_files(true)
               parse_jacoco_coverage_report($g_coverage_txt)
               lineCov = @coverager.getCoverage
               lineCovPer = @coverager.getLineCoveragePercentage
             end
 
             open(@mcmc_sampling_log_file, 'a') { |f|
-                f.puts "MCMC: iteration: #{@mcmc_iteration}, total test suite size: #{@total_test_suite_size}, the total line coverage in history : #{lineCov}"
+                f.puts "MCMC: iteration: #{@mcmc_iteration}, total test suite size: #{@total_test_suite_size}, the total line coverage in history : #{lineCovPer}"
                 f.puts "----------------------------\n\n"
             }
-            puts "#{@manager_name} I: MCMC: iteration: #{@mcmc_iteration}, total test suite size: #{@total_test_suite_size}, the total line coverage in history: #{lineCov}"
+            puts "#{@manager_name} I: MCMC: iteration: #{@mcmc_iteration}, total test suite size: #{@total_test_suite_size}, the total line coverage in history: #{lineCovPer}"
     
 
           elsif $closed_source_apk == true then # closed-source apk
 		
-			method_coverage = ""
+			      method_coverage = ""
 
-			if not $g_disable_coverage_report then
-            	merge_cov_cmd = "python #{$myConf.get_ella_tool_dir()}/coverage.py #{$myConf.get_app_dir_loc()} MCMC_#{@mcmc_iteration}"
-            	puts "$ #{merge_cov_cmd}"
-            	res = `#{merge_cov_cmd}`
-            	puts "***** merge coverage, finished!!! ******* "
+			      if not $g_disable_coverage_report then
+              merge_cov_cmd = "python #{$myConf.get_ella_tool_dir()}/coverage.py #{$myConf.get_app_dir_loc()} MCMC_#{@mcmc_iteration}"
+              puts "$ #{merge_cov_cmd}"
+              res = `#{merge_cov_cmd}`
+              puts "***** merge coverage, finished!!! ******* "
             	method_coverage = res.strip
-			end
+			      end
 
-			method_coverage = 0.5 #TODO fake data
+			      method_coverage = 0.5 #TODO fake data
             
             open(@mcmc_sampling_log_file, 'a') { |f|
                f.puts "MCMC: iteration: #{@mcmc_iteration}, test suite size: #{test_suite_size}, the method coverage: #{method_coverage}, the elapsed time: #{elapsed_time}"
@@ -714,6 +721,11 @@ class AgentManager
           
           # stop the mcmc sampling
           if @mcmc_iteration >= max_iteration.to_i
+            clientSession.puts "STOP"
+            break
+          end
+
+          if Time.now - s_time > $mcmc_sampling_time_sec
             clientSession.puts "STOP"
             break
           end
@@ -809,7 +821,7 @@ event_delay = 0
 # the delay after the restart event
 restart_delay = 0
 
-$mcmc_sampling_time = 1*60*60
+$mcmc_sampling_time_sec = 1.5*60*60
 
 ######
 

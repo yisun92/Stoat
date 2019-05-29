@@ -301,7 +301,9 @@ def mcmc_sampling_fuzzing_open_source_projects(app_dir, apk_path, avd_serial, st
 		  		
 				# start the stoat client
 				Dir.chdir($STOAT_TOOL_DIR + "/a3e") do
-				  	execute_shell_cmd_output("#{$timeout_cmd} #{$mcmc_sampling_time} ruby ./bin/agentManager.rb --app #{app_dir_path} --apk #{apk_path} --dev #{avd_serial} --port #{stoat_port} --devnum 1 --max_iteration 500 --event_delay #{$event_delay} --project_type #{$project_type}")
+				  	#execute_shell_cmd_output("#{$timeout_cmd} #{$mcmc_sampling_time} ruby ./bin/agentManager.rb --app #{app_dir_path} --apk #{apk_path} --dev #{avd_serial} --port #{stoat_port} --devnum 1 --max_iteration 500 --event_delay #{$event_delay} --project_type #{$project_type}")
+					execute_shell_cmd_output("ruby ./bin/agentManager.rb --app #{app_dir_path} --apk #{apk_path} --dev #{avd_serial} --port #{stoat_port} --devnum 1 --max_iteration 500 --event_delay #{$event_delay} --project_type #{$project_type}")
+
 				end
 
 				puts "** FINISH STOAT FOR MCMC SAMPLING"
@@ -414,7 +416,7 @@ stoat_port="2000"
 force_to_create=false 
 force_to_restart=false
 $model_construction_time="1h"
-$mcmc_sampling_time="1h"
+$mcmc_sampling_time="1.5h"
 
 # only construct the app model by gui exploration without mcmc sampling
 $only_gui_exploration=false 

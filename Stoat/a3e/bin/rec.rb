@@ -648,7 +648,7 @@ def ripping_app (package_name_under_test, entry_activity_under_test, startr, nol
             
             
             # dump coverage files every five iterations, we do not dump coverage for closed-source apps
-            if $closed_source_apk == false && $default_A3E_iteration % 2 == 0 && (not $g_disable_coverage_report) then
+            if $closed_source_apk == false && $default_A3E_iteration % 100 == 0 && (not $g_disable_coverage_report) then
             
               # dump code coverage
               # Note we use timeout to solve non-responding cases when dumping code coverage
@@ -968,7 +968,7 @@ $g_disable_coverage_report = false
 $g_enable_screenshot = false
 $g_app_start_wait_time = 5
 
-$model_construction_time_sec = 1*60*60
+$model_construction_time_sec = 1.5*60*60
 
 
 Dir.foreach(PARENT) {|f| fn = File.join(PARENT, f); File.delete(fn) if f != '.' && f != '..'}
@@ -1112,24 +1112,24 @@ ripping_app pkg, act, 1, noloop
     
 
 # stop the server
-report_crawler_state("STOP","")
+#report_crawler_state("STOP","")
 
 # stop the coverage recording of Ella
-if $ella_coverage == true then
-   clear_ella_coverage_cmd = "#{$myConf.get_ella_tool_dir()}/ella.sh e #{$emulator_serial}"
-   puts "$ #{clear_ella_coverage_cmd}"
-   `#{clear_ella_coverage_cmd}`
-end
+#if $ella_coverage == true then
+#   clear_ella_coverage_cmd = "#{$myConf.get_ella_tool_dir()}/ella.sh e #{$emulator_serial}"
+#   puts "$ #{clear_ella_coverage_cmd}"
+#   `#{clear_ella_coverage_cmd}`
+#end
 
 # uninstall the app
-uninstall_app(apk_name)
+#uninstall_app(apk_name)
 
 # clean up adb in the localhost only for the target device
-logcat_pids = `ps | grep 'adb' | awk '{print $1}'`
-logcat_pids_list = logcat_pids.sub!("\n", " ")
-kill_adb_cmd = "kill -9 #{logcat_pids_list}"  # kill the adb logcat process
-puts "$ #{kill_adb_cmd}"
-`#{kill_adb_cmd}`
+#logcat_pids = `ps | grep 'adb' | awk '{print $1}'`
+#logcat_pids_list = logcat_pids.sub!("\n", " ")
+#kill_adb_cmd = "kill -9 #{logcat_pids_list}"  # kill the adb logcat process
+#puts "$ #{kill_adb_cmd}"
+#`#{kill_adb_cmd}`
 
 exit
 
